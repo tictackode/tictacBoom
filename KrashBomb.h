@@ -6,7 +6,7 @@ class KrashBomb
    public:
    int x_location;
    int y_location;
-   int rangeOfExplosion;
+   //int rangeOfExplosion;
    volatile int activationTime;
    int bombTimeCount;
    bool bombIsSet;
@@ -14,15 +14,14 @@ class KrashBomb
 
    KrashBomb()
    {
-        this->rangeOfExplosion=1;
+       
         this->bombIsSet=false;
         
    }
-   KrashBomb(volatile int timer,int x_location,int y_location,int rangeOfExplosion)
+   KrashBomb(volatile int timer,int x_location,int y_location)
    {
        this->x_location=x_location;
        this->y_location=y_location;
-       this->rangeOfExplosion=rangeOfExplosion;
        this->activationTime=timer;
    }
 
@@ -33,16 +32,16 @@ class KrashBomb
         delete(this);
    }
 
-    void setKrashBomb(volatile int timer,int x_location,int y_location,int rangeOfExplosion)
+    void setKrashBomb(volatile int timer,int x_location,int y_location)
    {
        this->x_location=x_location;
        this->y_location=y_location;
-       this->rangeOfExplosion=rangeOfExplosion;
        this->activationTime=timer;
        this->bombIsSet=true;
        //this->bombTimeCount=bombTime;
    }
    void checkExplosion();
+   void explosionAnimation();
    
 
 };

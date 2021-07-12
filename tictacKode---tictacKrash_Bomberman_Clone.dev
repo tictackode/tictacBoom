@@ -1,7 +1,7 @@
 [Project]
 FileName=tictacKode---tictacKrash_Bomberman_Clone.dev
 Name=tictacKode---tictacKrash_Bomberman_Clone
-UnitCount=6
+UnitCount=7
 Type=0
 Ver=1
 ObjFiles=
@@ -101,6 +101,16 @@ AutoIncBuildNr=0
 FileName=Audio.h
 CompileCpp=1
 Folder=tictacKode---tictacKrash_Bomberman_Clone
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit7]
+FileName=Fonts.h
+CompileCpp=1
+Folder=
 Compile=1
 Link=1
 Priority=1000

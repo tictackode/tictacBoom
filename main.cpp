@@ -2,6 +2,7 @@
 #include <allegro.h>
 #include <time.h>
 #include "Glow.h"
+
 #include "functions.h"
 
 int main()
@@ -10,6 +11,7 @@ int main()
     init();
     loadAll();
     initGame();
+    //clearItemsMatrix();
 
 	LOCK_FUNCTION(incrementaTimer);
 	LOCK_VARIABLE(timer);

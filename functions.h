@@ -1,15 +1,27 @@
 #include <time.h>
+#include <allegro.h>
 
 #include "Jogador.h"
 #include "Audio.h"
+//#include "Fonts.h"
 
 #define tamBloco 64
 #define numberOfBlocksX 18
 #define numberOfBlocksY 11
 
+/*gameFonts.Fonts();
+gameFonts.loadALLFonts();
+*/
 
 char tela[numberOfBlocksX][numberOfBlocksY];
+char items[numberOfBlocksX][numberOfBlocksY];
 
+/*
+FONT* letra;
+FONT* fontCordia48;
+FONT* fontCordia28;
+*/
+      
 BITMAP* stageFloors[numberOfBlocksX][numberOfBlocksY];
 BITMAP* stageBricks[numberOfBlocksX][numberOfBlocksY];
 
@@ -25,6 +37,8 @@ BITMAP* blocoRosa;
 BITMAP* logo;
 BITMAP* krashBombImage;
 BITMAP* brick;
+BITMAP* explosionBitmap;
+BITMAP* itemRaiseRangeOfExplosion;
 
 BITMAP* sprite1_front1;
 BITMAP* sprite1_left1;
@@ -35,10 +49,6 @@ BITMAP* sprite2_front1;
 BITMAP* sprite2_left1;
 BITMAP* sprite2_right1;
 BITMAP* sprite2_back1;
-
-//FONT *letra;
-/*FONT *fontCordia48;
-FONT *fontCordia28;*/
 
 // timer
 volatile int timer;
@@ -164,22 +174,36 @@ void highcolor_fade_in(BITMAP *bmp_orig, int speed)
     blit(bmp_orig, screen, 0,0, 0,0, SCREEN_W, SCREEN_H);
 }
 
+/*void clearItemsMatrix()
+{
+     
+     for(int i=0;i<numberOfBlocksX;i++)
+     {
+          for(int j=0;i<numberOfBlocksY;j++)
+          {
+               items[i][j]='0';
+          }
+     }   
+     
+}*/
+
 void loadAll()
 {   //function that loads all extern images and fonts
 
     set_window_title("TictacKrash - A TictacKode's Bomberman clone!");
     buffer=create_bitmap(numberOfBlocksX*tamBloco,numberOfBlocksY*tamBloco);
 
-    /*fontCordia28=load_font("fonts/cordia28.pcx",NULL,NULL);
-    if(!fontCordia28) { exit(1); }
-
-    letra=load_font("fonts/cordia36.pcx",NULL,NULL);
+    /*letra = load_font("fonts/arial18.pcx",NULL,NULL);
+    fontCordia48 = load_font("fonts/cordia28.pcx",NULL,NULL);
+    fontCordia28 = load_font("fonts/cordia48.pcx",NULL,NULL);*/
+          
+    /*if(!fontCordia28) { exit(1); }
+          
     if(!letra) { exit(1); }
 
-    fontCordia48=load_font("fonts/cordia48.pcx",NULL,NULL);
-    if(!fontCordia48) { exit(1); }*/
+    if(!fontCordia48) { exit(1); }  */
 
-    logo=create_bitmap(13*tamBloco,11*tamBloco);
+    logo=create_bitmap(numberOfBlocksX*tamBloco,numberOfBlocksY*tamBloco);
     logo=load_bitmap("img/tictackode.bmp",0);
     if(!logo) { exit(1); }
 
@@ -187,6 +211,10 @@ void loadAll()
     krashBombImage=load_bitmap("img/timebomb256colors.bmp",0);
     if(!logo) { exit(1); }
 
+    
+    itemRaiseRangeOfExplosion=create_bitmap(tamBloco,tamBloco);
+    itemRaiseRangeOfExplosion=load_bitmap("img/itemRaiseRangeOfExplosion.bmp",0);
+    if(!itemRaiseRangeOfExplosion) { exit(1); }
 
     sprite1_front1=create_bitmap(tamBloco,tamBloco);
     sprite1_front1=load_bitmap("img/sprite1_front1.bmp",0);
@@ -203,6 +231,10 @@ void loadAll()
     sprite1_back1=create_bitmap(tamBloco,tamBloco);
     sprite1_back1=load_bitmap("img/sprite1_back1.bmp",0);
     if(!sprite1_back1) { exit(1); }
+    
+    explosionBitmap=create_bitmap(tamBloco,tamBloco);
+    explosionBitmap=load_bitmap("img/explosionBitmap.bmp",0);
+    if(!explosionBitmap) { exit(1); }
 
 
     sprite2_front1=create_bitmap(tamBloco,tamBloco);
@@ -227,7 +259,7 @@ void loadAll()
 void freeAll()
 {   //clear the game bitmaps from memory
 
-   /* destroy_bitmap(blocoVerm);
+    destroy_bitmap(blocoVerm);
     destroy_bitmap(blocoAzul);
     destroy_bitmap(blocoVerde);
     destroy_bitmap(blocoCinza);
@@ -235,8 +267,11 @@ void freeAll()
     destroy_bitmap(blocoRoxo);
     destroy_bitmap(blocoLaranja);
     destroy_bitmap(blocoRosa);
-    destroy_bitmap(krashBombImage);*/
+    destroy_bitmap(krashBombImage);
     destroy_bitmap(buffer);
+    destroy_bitmap(explosionBitmap);
+    destroy_bitmap(itemRaiseRangeOfExplosion);
+    
 
     //clear the fonts used in the game
     //destroy_font(letra);
@@ -244,15 +279,33 @@ void freeAll()
     destroy_font(fontCordia28);*/
 
 }
-
+BITMAP* randomExplosionBitmap()
+{
+    BITMAP* explosionBitmap;
+    explosionBitmap=create_bitmap(tamBloco,tamBloco);
+    int aux1=0;
+    int aux2=0;
+    
+    for(int i=0;i<64;i++)
+    {
+        for(int j=0;j<64;j++)
+        {
+             aux1=rand()%70;
+             aux2=rand()%70;
+             putpixel(explosionBitmap, i, j, makecol(180+aux1,0,180+aux2));
+        }
+    }
+   
+    return explosionBitmap;
+}
 void KrashBomb::checkExplosion()
 {
 
-       if((this->bombIsSet==true)&&(timer-this->activationTime)>3)
+       if((this->bombIsSet==true)&&(timer-this->activationTime>3))
        {
            gameAudio.playSample(gameAudio.bomb1);
            
-           for(int i=1;i<=this->rangeOfExplosion;i++)
+           for(int i=1;i<=player1.rangeOfExplosion;i++)
            {
                 if(tela[this->x_location+i][this->y_location]!='P')
                 {
@@ -277,15 +330,137 @@ void KrashBomb::checkExplosion()
                     tela[this->x_location][this->y_location-i]='F';
 
                 }
+            }// for
+                
 
+            
+           tela[this->x_location][this->y_location]='E';
+           this->bombIsSet=false;
+            
+            // setting the explosion bitmap in the screen char matrix
+           for(int i=1;i<=player1.rangeOfExplosion;i++)
+           { 
+               if((tela[this->x_location+i][this->y_location])!='P')
+               {
+                    tela[this->x_location+i][this->y_location]='E';   
+               }
+               else
+               {
+                   i=player1.rangeOfExplosion;
+               }
            }
-            tela[this->x_location][this->y_location]='F'; // bomb becomes floor
-            this->bombIsSet=false;
+           
+           for(int i=1;i<=player1.rangeOfExplosion;i++)
+           {  
+               if((tela[this->x_location+i][this->y_location])!='P')
+               {
+                    tela[this->x_location+i][this->y_location]='E';   
+               }
+               else
+               {
+                   i=player1.rangeOfExplosion;
+               }
+           }
+              
+           for(int i=1;i<=player1.rangeOfExplosion;i++)
+           {   
+               if((tela[this->x_location-i][this->y_location])!='P')
+               {
+                    tela[this->x_location-i][this->y_location]='E';   
+               }
+               else
+               {
+                   i=player1.rangeOfExplosion;
+               }
+           }
+            
+           for(int i=1;i<=player1.rangeOfExplosion;i++)
+           { 
+               if((tela[this->x_location][this->y_location+i])!='P')
+               {
+                    tela[this->x_location][this->y_location+i]='E';   
+               }
+               else
+               {
+                   i=player1.rangeOfExplosion;
+               }
+           }
+           for(int i=1;i<=player1.rangeOfExplosion;i++)
+           {  
+               if((tela[this->x_location][this->y_location-i])!='P')
+               {
+                    tela[this->x_location][this->y_location-i]='E';   
+               }
+               else
+               {
+                   i=player1.rangeOfExplosion;
+               }
+           }
 
-       }
+           
+       }// if
        
+       if((this->bombIsSet==false)&&((timer-this->activationTime)>4))
+       {
+           tela[this->x_location][this->y_location]='F';
+           
+           //randomly sets itemRaiseRangeOfExplosion   '1'
+           for(int i=1;i<=player1.rangeOfExplosion;i++)
+           {
+               if((tela[this->x_location+i][this->y_location])=='E')
+               {
+                   if(items[this->x_location+i][this->y_location]=='1')
+                   {
+                        tela[this->x_location+i][this->y_location]='1';                                                   
+                   }
+                   else
+                   {
+                        tela[this->x_location+i][this->y_location]='F';       
+                   }
+                   
+               }
+               if((tela[this->x_location-i][this->y_location])=='E')
+               {
+                    if(items[this->x_location-i][this->y_location]=='1')
+                   {
+                        tela[this->x_location-i][this->y_location]='1';                                                   
+                   }
+                   else
+                   {
+                        tela[this->x_location-i][this->y_location]='F';       
+                   }
+                            
+               }
+               if((tela[this->x_location][this->y_location+i])=='E')
+               {
+                   if(items[this->x_location][this->y_location+i]=='1')
+                   {
+                        tela[this->x_location][this->y_location+i]='1';                                                   
+                   }
+                   else
+                   {
+                        tela[this->x_location][this->y_location+i]='F';       
+                   }
+                      
+               }
+               if((tela[this->x_location][this->y_location-i])=='E')
+               {
+                   if(items[this->x_location][this->y_location-i]=='1')
+                   {
+                        tela[this->x_location][this->y_location-i]='1';                                                   
+                   }
+                   else
+                   {
+                        tela[this->x_location][this->y_location-i]='F';       
+                   }
+                   
+               }//if
+                                                                         
+           }//for
+       }//if activationTime>4
 
-}
+} // end of function
+
 void criaBloco(BITMAP* bmp, int red, int green, int blue)
 {   //this function generates the color for the square bitmaps
 
@@ -343,21 +518,31 @@ void initBlockColor()
             if((i%2!=0)&&(j%2!=0))
             {
                 tela[i][j]='P'; //Pillar
+                items[i][j]='P'; 
             }
-            if((i%2==0)&&(j%2==0))
+            else
             {
-                aux=rand()%3;
-                if(aux==0)
+                // 50% of chance to set a Brick
+                aux=rand()%30;
+                if(aux<14)
                 {
-                    tela[i][j]='B'; // 33% of chance to set a Brick
+                    tela[i][j]='B'; 
                     stageBricks[i][j]=createBrickBitmap();
+                    aux=rand()%100;
+                    if(aux<15)
+                    {
+                        //sets item range of ewxplosion
+                        items[i][j]='1';
+                    }
+                    
                 }
                 else
                 {
                     tela[i][j]='F'; //Floor
-
+                    
 
                 }
+               
             }
         }
     }
@@ -374,25 +559,26 @@ void initGame()
     initBlockColor();
     createBrickBitmap();
 
-    player1.x=0;
-    player1.y=0;
+    player1.x=10;
+    player1.y=10;
     player1.imagem=sprite1_front1;
     tela[player1.x][player1.y]='@';
 
-    CPU1.x=10;
-    CPU1.y=10;
-    CPU1.imagem=sprite2_front1;
-    tela[CPU1.x][CPU1.y]='1';
+    //CPU1.x=10;
+    //CPU1.y=10;
+    //CPU1.imagem=sprite2_front1;
+    //tela[CPU1.x][CPU1.y]='1';
 
 }
 void tela_inicial()
 {   //initial screen
 
-
     int loop_count=0;
     
-    while(loop_count<1000)
+    while(loop_count<800)
     {
+        
+        stretch_sprite(buffer, logo, 150, 0, 700, 700);
        // draw_sprite(buffer, spiderman_intro, 0, 0);
         textprintf_ex(buffer, font, 50,250 ,makecol(glow.fontaux,0,0),-1,"tictacKode");
         textprintf_ex(buffer, font, 50,300 ,makecol(glow.fontaux,0,0),-1,"tictacKrash");
@@ -400,7 +586,7 @@ void tela_inicial()
         loop_count++;
         glow.glowingColor();
 
-        blit(buffer,screen,0,0,0,0,20*tamBloco,20*tamBloco);
+        blit(buffer,screen,0,0,0,0,numberOfBlocksX*tamBloco,numberOfBlocksY*tamBloco);
         if(key[KEY_ESC]) { freeAll(); deinit(); exit(0); }
     }
     gameAudio.playSample(gameAudio.intro);
@@ -453,11 +639,9 @@ BITMAP* createBrickBitmap()
 
     hline(brick,0,46,64,makecol(aux,aux,aux));
 
-    
-
     //void vline(BITMAP *bmp, int x, int y1, int y2, int color);
     //rect(BITMAP *bmp, int x1, int y1, int x2, int y2, int color);
-    vline(brick,20,0 , 15, makecol(255,255,255));
+    vline(brick,24,0 , 15, makecol(255,255,255));
     
    // int positionTemp=rand()%20;
    // rect(brick,positionTemp,0,positionTemp+15,15,makecol(255,255,255));
@@ -472,12 +656,15 @@ BITMAP* createBrickBitmap()
     
    // positionTemp=rand()%20;
     vline(brick,50,46 , 63, makecol(255,255,255));
+    vline(brick,12,46 , 63, makecol(255,255,255));
    // rect(brick,positionTemp,46,positionTemp+15,63,makecol(255,255,255));
       
     rect(brick,0,0,63,63,makecol(255,255,255));
     
     return brick;
 }
+
+
 
 void paint()
 {   //função que desenha o estado atual do jogo
@@ -502,6 +689,18 @@ void paint()
             else if(tela[i][j]=='K')
             {    // drawing a krash bomb
                  blit(krashBombImage,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 
+                 
+            }
+             else if(tela[i][j]=='1')
+            {    // drawing a krash bomb
+                 blit(itemRaiseRangeOfExplosion,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 
+                 
+            }
+            else if(tela[i][j]=='E')
+            {    // drawing a krash bomb
+                 blit(explosionBitmap/*randomExplosionBitmap() */,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
                  
                  
             }
@@ -606,16 +805,29 @@ void controle()
 
     if(key[KEY_UP]||key[KEY_W])
     {
+        
         if(player1.y>0)
         {
+            if(items[player1.x][player1.y-1]=='1')
+            {
+                player1.rangeOfExplosion++;
+                gameAudio.playSample(gameAudio.powerUp);
+                tela[player1.x][player1.y-1]='1';
+                items[player1.x][player1.y-1]='B';
+            }
             if((testColisionUP('P'))&&(testColisionUP('B'))&&(testColisionUP('K')))
             {
-                if(tela[player1.x][player1.y]!='K') { tela[player1.x][player1.y]='F'; }
+                
+                if(tela[player1.x][player1.y]!='K') 
+                { 
+                    tela[player1.x][player1.y]='F'; 
+                }
                 player1.y-=1;
                 tela[player1.x][player1.y]='@';
                 player1.imagem=sprite1_back1;
                 gameAudio.playSample(gameAudio.step2);
             }
+           
         }
         
     }
@@ -624,14 +836,23 @@ void controle()
     {
         if(player1.y<numberOfBlocksY-1)
         {
+            if(items[player1.x][player1.y+1]=='1')
+            {
+                player1.rangeOfExplosion++;
+                gameAudio.playSample(gameAudio.powerUp);
+                tela[player1.x][player1.y+1]='@';
+                items[player1.x][player1.y+1]='B';
+            }
             if((testColisionDOWN('P'))&&(testColisionDOWN('B'))&&(testColisionDOWN('K')))
             {
+                
                 if(tela[player1.x][player1.y]!='K') { tela[player1.x][player1.y]='F'; }
                 player1.y+=1;
                 tela[player1.x][player1.y]='@';
                 player1.imagem=sprite1_front1;
                 gameAudio.playSample(gameAudio.step2);
             }
+            
         }
         
     }
@@ -640,14 +861,23 @@ void controle()
     {
         if(player1.x>0)
         {
+            if(items[player1.x-1][player1.y]=='1')
+            {
+                player1.rangeOfExplosion++;
+                gameAudio.playSample(gameAudio.powerUp);
+                tela[player1.x-1][player1.y]='@';
+                items[player1.x-1][player1.y]='B';
+            }
             if((testColisionLEFT('P'))&&(testColisionLEFT('B'))&&(testColisionLEFT('K')))
             {
+                
                 if(tela[player1.x][player1.y]!='K') { tela[player1.x][player1.y]='F'; }
                 player1.x-=1;
                 tela[player1.x][player1.y]='@';
                 player1.imagem=sprite1_left1;
                 gameAudio.playSample(gameAudio.step2);
             }
+            
         }
         
 
@@ -657,14 +887,26 @@ void controle()
     {
         if(player1.x<numberOfBlocksX-1)
         {
+            if(items[player1.x+1][player1.y]=='1')
+            {
+                player1.rangeOfExplosion++;
+                gameAudio.playSample(gameAudio.powerUp);
+                 tela[player1.x+1][player1.y]='@';
+                 items[player1.x+1][player1.y]='B';
+            }
             if((testColisionRIGHT('P'))&&(testColisionRIGHT('B'))&&(testColisionRIGHT('K')))
             {
-                if(tela[player1.x][player1.y]!='K') { tela[player1.x][player1.y]='F'; }
+               
+                if(tela[player1.x][player1.y]!='K') 
+                { 
+                    tela[player1.x][player1.y]='F'; 
+                }
                 player1.x+=1;
                 tela[player1.x][player1.y]='@';
                 player1.imagem=sprite1_right1;
                 gameAudio.playSample(gameAudio.step2);
             }
+            
         }
         
 
@@ -675,27 +917,27 @@ void controle()
 
         if(player1.bomb[0].bombIsSet==false)
         {
-            player1.bomb[0].setKrashBomb(timer,player1.x ,player1.y ,player1.rangeOfExplosion);
+            player1.bomb[0].setKrashBomb(timer,player1.x ,player1.y);
             tela[player1.x][player1.y]='K';
         }
         else if(player1.bomb[1].bombIsSet==false)
         {
-            player1.bomb[1].setKrashBomb(timer,player1.x ,player1.y ,player1.rangeOfExplosion);
+            player1.bomb[1].setKrashBomb(timer,player1.x ,player1.y);
             tela[player1.x][player1.y]='K';
         }
         else if(player1.bomb[2].bombIsSet==false)
         {
-            player1.bomb[2].setKrashBomb(timer,player1.x ,player1.y ,player1.rangeOfExplosion);
+            player1.bomb[2].setKrashBomb(timer,player1.x ,player1.y );
             tela[player1.x][player1.y]='K';
         }
         else if(player1.bomb[3].bombIsSet==false)
         {
-            player1.bomb[3].setKrashBomb(timer,player1.x ,player1.y ,player1.rangeOfExplosion);
+            player1.bomb[3].setKrashBomb(timer,player1.x ,player1.y );
             tela[player1.x][player1.y]='K';
         }
         else if(player1.bomb[4].bombIsSet==false)
         {
-            player1.bomb[4].setKrashBomb(timer,player1.x ,player1.y ,player1.rangeOfExplosion);
+            player1.bomb[4].setKrashBomb(timer,player1.x ,player1.y );
             tela[player1.x][player1.y]='K';
         }
 

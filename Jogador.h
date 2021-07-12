@@ -27,6 +27,33 @@ class Jogador
         this->rangeOfExplosion=rangeOfExplosion;
 
    }
+   /*void checkPlayerGetItem()
+   {
+        if(checkColisionRight('1'))
+        {
+            this->x++;
+            tela[this->x][this->y]='F';
+            this->rangeOfExplosion++;                                   
+        }
+        if(checkColisionLeft('1'))
+        {
+            this->x--;
+            tela[this->x][this->y]='F';
+            this->rangeOfExplosion++;                                   
+        }
+        if(checkColisionUp('1'))
+        {
+            this->y--;
+            tela[this->x][this->y]='F';
+            this->rangeOfExplosion++;                                   
+        } 
+        if(checkColisionDown('1'))
+        {
+            this->y++;
+            tela[this->x][this->y]='F';
+            this->rangeOfExplosion++;                                   
+        }         
+   }*/
 
 };
 

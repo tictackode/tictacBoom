@@ -14,6 +14,7 @@ class Audio
       SAMPLE* step1;
       SAMPLE* step2;
       SAMPLE* bomb1;
+      SAMPLE* powerUp;
       
       Audio()
       {
@@ -22,6 +23,7 @@ class Audio
           this->step1 = load_sample("sound/step1.wav");
           this->step2 = load_sample("sound/step2.wav");
           this->bomb1 = load_sample("sound/bomb1.wav");
+          this->powerUp = load_sample("sound/powerUp.wav");
              
       }
       ~Audio()
