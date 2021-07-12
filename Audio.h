@@ -15,6 +15,7 @@ class Audio
       SAMPLE* step2;
       SAMPLE* bomb1;
       SAMPLE* powerUp;
+      SAMPLE* deadSkeleton;
       
       Audio()
       {
@@ -24,6 +25,7 @@ class Audio
           this->step2 = load_sample("sound/step2.wav");
           this->bomb1 = load_sample("sound/bomb1.wav");
           this->powerUp = load_sample("sound/powerUp.wav");
+          this->deadSkeleton = load_sample("sound/deadSkeleton.wav");
              
       }
       ~Audio()
@@ -33,6 +35,7 @@ class Audio
           destroy_sample(this->step1);
           destroy_sample(this->step2);
           destroy_sample(this->bomb1);
+          destroy_sample(this->deadSkeleton);
           delete(this);
       }
       

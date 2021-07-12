@@ -3,28 +3,9 @@
 
 #include "Jogador.h"
 #include "Audio.h"
-//#include "Fonts.h"
+#include "InitMapMatrix.h"
 
-#define tamBloco 64
-#define numberOfBlocksX 18
-#define numberOfBlocksY 11
-
-/*gameFonts.Fonts();
-gameFonts.loadALLFonts();
-*/
-
-char tela[numberOfBlocksX][numberOfBlocksY];
-char items[numberOfBlocksX][numberOfBlocksY];
-
-/*
-FONT* letra;
-FONT* fontCordia48;
-FONT* fontCordia28;
-*/
-      
-BITMAP* stageFloors[numberOfBlocksX][numberOfBlocksY];
-BITMAP* stageBricks[numberOfBlocksX][numberOfBlocksY];
-
+ 
 BITMAP* buffer;
 BITMAP* blocoVerm;
 BITMAP* blocoAzul;
@@ -36,7 +17,7 @@ BITMAP* blocoLaranja;
 BITMAP* blocoRosa;
 BITMAP* logo;
 BITMAP* krashBombImage;
-BITMAP* brick;
+
 BITMAP* explosionBitmap;
 BITMAP* itemRaiseRangeOfExplosion;
 
@@ -49,6 +30,13 @@ BITMAP* sprite2_front1;
 BITMAP* sprite2_left1;
 BITMAP* sprite2_right1;
 BITMAP* sprite2_back1;
+
+BITMAP* enemy_right;
+BITMAP* enemy_left;
+
+BITMAP* door;
+
+BITMAP* createBlueBrickBitmap();
 
 // timer
 volatile int timer;
@@ -252,6 +240,25 @@ void loadAll()
     sprite2_back1=create_bitmap(tamBloco,tamBloco);
     sprite2_back1=load_bitmap("img/sprite2_back1.bmp",0);
     if(!sprite2_back1) { exit(1); }
+    
+    door=create_bitmap(tamBloco,tamBloco);
+    door=load_bitmap("img/door.bmp",0);
+    if(!door) { exit(1); }
+    
+    enemy_left=create_bitmap(64,64);
+    enemy_right=create_bitmap(64,64);
+            
+    enemy_right=load_bitmap("img/skull_right.bmp",0);
+    if(!enemy_right) 
+    {
+        exit(1);
+    }
+    
+    enemy_left=load_bitmap("img/skull_left.bmp",0);
+    if(!enemy_left) 
+    {
+        exit(1); 
+    }
 
 
 
@@ -271,6 +278,9 @@ void freeAll()
     destroy_bitmap(buffer);
     destroy_bitmap(explosionBitmap);
     destroy_bitmap(itemRaiseRangeOfExplosion);
+    
+    destroy_bitmap(enemy_right);
+    destroy_bitmap(enemy_left);
     
 
     //clear the fonts used in the game
@@ -298,6 +308,48 @@ BITMAP* randomExplosionBitmap()
    
     return explosionBitmap;
 }
+
+void checkSkeletonDestroyed(int x, int y)
+{
+    if(tela[x][y]=='S')
+    {
+        
+        gameAudio.playSample(gameAudio.deadSkeleton);
+        numberOfEnemies--;                
+                     
+    }  
+    
+    
+    if(numberOfEnemies==0)
+    {
+        //stageClear   --- setting the door randomly
+         int temp1,temp2;
+         bool doorOK=false;
+         while(!doorOK)
+         {
+             temp1=rand()%64;
+             temp2=rand()%64;
+         
+             if(tela[temp1][temp2]=='F')
+             {
+                 tela[temp1][temp2]='D';                                                                                                        
+                 doorOK=true;
+             } 
+             
+         }
+         
+         numberOfEnemies=7;
+         stageNumber=2;
+         
+        
+                            
+    }
+      
+     
+     
+     
+} 
+
 void KrashBomb::checkExplosion()
 {
 
@@ -307,26 +359,32 @@ void KrashBomb::checkExplosion()
            
            for(int i=1;i<=player1.rangeOfExplosion;i++)
            {
-                if(tela[this->x_location+i][this->y_location]!='P')
+                if(tela[this->x_location+i][this->y_location]!='P')/*&&(numberOfBlocksX>=(this->x_location+player1.rangeOfExplosion)))*/
                 {
+                                                                   
+                                                                   
+                    checkSkeletonDestroyed(this->x_location+i,this->y_location);
                     tela[this->x_location+i][this->y_location]='F';
-
+                                                                                                      
 
                 }
                 if(tela[this->x_location-i][this->y_location]!='P')
                 {
+                    checkSkeletonDestroyed(this->x_location-i,this->y_location);
                     tela[this->x_location-i][this->y_location]='F';
 
                 }
 
                 if(tela[this->x_location][this->y_location+i]!='P')
                 {
+                    checkSkeletonDestroyed(this->x_location,this->y_location+i);
                     tela[this->x_location][this->y_location+i]='F';
 
                 }
 
                 if(tela[this->x_location][this->y_location-i]!='P')
                 {
+                    checkSkeletonDestroyed(this->x_location,this->y_location-i);
                     tela[this->x_location][this->y_location-i]='F';
 
                 }
@@ -461,20 +519,7 @@ void KrashBomb::checkExplosion()
 
 } // end of function
 
-void criaBloco(BITMAP* bmp, int red, int green, int blue)
-{   //this function generates the color for the square bitmaps
 
-	int escuroR = 30,escuroG=30,escuroB=30;
-
-	if (red < 30) { escuroR = 0; }
-	if (green < 30) { escuroG = 0; }
-	if (blue < 30) { escuroB = 0; }
-
-	rectfill(bmp, 0, 0, tamBloco - (tamBloco / 10), tamBloco - (tamBloco / 10), makecol(red, green, blue));
-	rectfill(bmp, 0, tamBloco - (tamBloco / 10), tamBloco, tamBloco, makecol(red - escuroR, green - escuroG, blue - escuroB));
-	rectfill(bmp, tamBloco - (tamBloco / 10), 0, tamBloco, tamBloco, makecol(red - escuroR, green - escuroG, blue - escuroB));
-
-}
 void initBlockColor()
 {
 	// tamBloco é a variavel que guarda o tamanho dos blocos
@@ -504,50 +549,7 @@ void initBlockColor()
 	criaBloco(blocoRosa, 255, 0, 128);
 
 }
- void initMapMatrix()
-{
-    int aux;
-    for(int i=0;i<numberOfBlocksX;i++)
-    {
-
-        for(int j=0;j<numberOfBlocksY;j++)
-        {
-            //generates a floor
-            stageFloors[i][j]=returnsRandomGrayscaleFloor();
-
-            if((i%2!=0)&&(j%2!=0))
-            {
-                tela[i][j]='P'; //Pillar
-                items[i][j]='P'; 
-            }
-            else
-            {
-                // 50% of chance to set a Brick
-                aux=rand()%30;
-                if(aux<14)
-                {
-                    tela[i][j]='B'; 
-                    stageBricks[i][j]=createBrickBitmap();
-                    aux=rand()%100;
-                    if(aux<15)
-                    {
-                        //sets item range of ewxplosion
-                        items[i][j]='1';
-                    }
-                    
-                }
-                else
-                {
-                    tela[i][j]='F'; //Floor
-                    
-
-                }
-               
-            }
-        }
-    }
-
-}
+ 
 
 void initGame()
 {
@@ -577,8 +579,8 @@ void tela_inicial()
     
     while(loop_count<800)
     {
-        
-        stretch_sprite(buffer, logo, 150, 0, 700, 700);
+        clear_to_color(buffer, makecol(255, 255, 255));
+        stretch_sprite(buffer, logo, 200, 0, 700, 700);
        // draw_sprite(buffer, spiderman_intro, 0, 0);
         textprintf_ex(buffer, font, 50,250 ,makecol(glow.fontaux,0,0),-1,"tictacKode");
         textprintf_ex(buffer, font, 50,300 ,makecol(glow.fontaux,0,0),-1,"tictacKrash");
@@ -603,68 +605,6 @@ void desenhaBlocoRandomico(int i, int j)
 
 
 }
-BITMAP* returnsRandomGrayscaleFloor()
-{
-    BITMAP* temp;
-    temp=create_bitmap(tamBloco,tamBloco);
-    int aux=32+rand()%32;
-
-    criaBloco(temp,aux,aux,aux);
-
-    return temp;
-}
-BITMAP* createBrickBitmap()
-{
-
-    brick=create_bitmap(tamBloco,tamBloco);
-
-    if(!brick) { freeAll(); deinit(); exit(0); }
-
-    int aux=200+rand()%25;
-
-    criaBloco(brick,aux,32,0);
-
-    aux=230+rand()%25;
-
-    //void hline(BITMAP *bmp, int x1, int y, int x2, int color);
-    hline(brick,0,15,64,makecol(aux,aux,aux));
-    rect(brick,0,0,0,31,makecol(aux,aux,aux));
-    aux=230+rand()%25;
-
-    hline(brick,0,31,64,makecol(aux,aux,aux));
-   // rect(brick,31,31,0,31,makecol(aux,aux,aux));
-    
-    
-    aux=230+rand()%25;
-
-    hline(brick,0,46,64,makecol(aux,aux,aux));
-
-    //void vline(BITMAP *bmp, int x, int y1, int y2, int color);
-    //rect(BITMAP *bmp, int x1, int y1, int x2, int y2, int color);
-    vline(brick,24,0 , 15, makecol(255,255,255));
-    
-   // int positionTemp=rand()%20;
-   // rect(brick,positionTemp,0,positionTemp+15,15,makecol(255,255,255));
-    
-    //positionTemp=rand()%20;
-    vline(brick,46,15 , 31, makecol(255,255,255));
-   // rect(brick,positionTemp,,positionTemp+15,31,makecol(255,255,255));
-    
-   // positionTemp=rand()%20;
-    vline(brick,36,31 , 46, makecol(255,255,255));
-    //rect(brick,positionTemp,31,positionTemp+15,46,makecol(255,255,255));
-    
-   // positionTemp=rand()%20;
-    vline(brick,50,46 , 63, makecol(255,255,255));
-    vline(brick,12,46 , 63, makecol(255,255,255));
-   // rect(brick,positionTemp,46,positionTemp+15,63,makecol(255,255,255));
-      
-    rect(brick,0,0,63,63,makecol(255,255,255));
-    
-    return brick;
-}
-
-
 
 void paint()
 {   //função que desenha o estado atual do jogo
@@ -695,6 +635,18 @@ void paint()
              else if(tela[i][j]=='1')
             {    // drawing a krash bomb
                  blit(itemRaiseRangeOfExplosion,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 
+                 
+            }
+            else if(tela[i][j]=='D')
+            {    // drawing the exit door
+                 blit(door,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 
+                 
+            }
+            else if(tela[i][j]=='S')
+            {    // drawing a skeleton
+                 blit(enemy_right,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
                  
                  
             }
@@ -734,6 +686,81 @@ void paint()
 
 //    textprintf_ex(buffer, fontCordia48, 10,tamBloco+50 ,makecol(0,glow.fontaux,0), -1,"Artefatos %d ",player1.artefatos);
     blit(buffer,screen,0,0,0,0,numberOfBlocksX*tamBloco,numberOfBlocksY*tamBloco);
+}
+void paint_to_buffer()
+{   //função que desenha o estado atual do jogo
+    //draws the current game state
+    set_alpha_blender();
+    set_write_alpha_blender(); 
+    
+    int i, j;
+    for(i=0; i<numberOfBlocksX; i++)
+    {
+        for(j=0; j<numberOfBlocksY; j++)
+        {
+            if((i%2!=0)&&(j%2!=0))
+            {   //drawing the pillar, inacessible place
+                blit(blocoVerde,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+            }
+            else if(tela[i][j]=='B')
+            {    // drawing a brick
+
+                 blit(stageBricks[i][j],buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+            }
+            else if(tela[i][j]=='K')
+            {    // drawing a krash bomb
+                 blit(krashBombImage,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 
+                 
+            }
+             else if(tela[i][j]=='1')
+            {    // drawing a krash bomb
+                 blit(itemRaiseRangeOfExplosion,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 
+                 
+            }
+            else if(tela[i][j]=='S')
+            {    // drawing a skeleton
+                 blit(enemy_right,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 
+                 
+            }
+            else if(tela[i][j]=='E')
+            {    // drawing a krash bomb
+                 blit(explosionBitmap/*randomExplosionBitmap() */,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 
+                 
+            }
+            else if(tela[i][j]=='@')
+            {    // drawing the player
+                 draw_trans_sprite(player1.imagem, buffer, i*tamBloco, j*tamBloco);
+                 
+                 //blit(player1.imagem,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 
+            }
+            else if(tela[i][j]=='1')
+            {    // drawing a krash bomb
+                 blit(CPU1.imagem,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+            }
+            else
+            {
+                //draw floor
+                blit(stageFloors[i][j],buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+
+            }
+
+        }
+    }
+
+    blit(player1.imagem,buffer,0,0,player1.x*tamBloco,player1.y*tamBloco,(player1.x*tamBloco)+tamBloco,(player1.y*tamBloco)+tamBloco);
+    //blit(artefato.imagem,buffer,0,0,artefato.x*tamBloco,artefato.y*tamBloco,(artefato.x*tamBloco)+tamBloco,(artefato.y*tamBloco)+tamBloco);
+    //blit(combustivel.imagem,buffer,0,0,combustivel.x*tamBloco,combustivel.y*tamBloco,(combustivel.x*tamBloco)+tamBloco,(combustivel.y*tamBloco)+tamBloco);
+
+    //timer
+    textprintf_ex(buffer, font, 10,tamBloco ,makecol(glow.fontaux,glow.fontaux,glow.fontaux), -1,"Timer %d ",timer);
+
+//    textprintf_ex(buffer, fontCordia48, 10,tamBloco+50 ,makecol(0,glow.fontaux,0), -1,"Artefatos %d ",player1.artefatos);
+   // blit(buffer,screen,0,0,0,0,numberOfBlocksX*tamBloco,numberOfBlocksY*tamBloco);
 }
 
 /*void gameOver()
@@ -800,159 +827,4 @@ bool testColisionRIGHT(char tile)
         return false;
     }
 }
-void controle()
-{   // handles the keys that controls the application
 
-    if(key[KEY_UP]||key[KEY_W])
-    {
-        
-        if(player1.y>0)
-        {
-            if(items[player1.x][player1.y-1]=='1')
-            {
-                player1.rangeOfExplosion++;
-                gameAudio.playSample(gameAudio.powerUp);
-                tela[player1.x][player1.y-1]='1';
-                items[player1.x][player1.y-1]='B';
-            }
-            if((testColisionUP('P'))&&(testColisionUP('B'))&&(testColisionUP('K')))
-            {
-                
-                if(tela[player1.x][player1.y]!='K') 
-                { 
-                    tela[player1.x][player1.y]='F'; 
-                }
-                player1.y-=1;
-                tela[player1.x][player1.y]='@';
-                player1.imagem=sprite1_back1;
-                gameAudio.playSample(gameAudio.step2);
-            }
-           
-        }
-        
-    }
-
-    if(key[KEY_DOWN]||key[KEY_S])
-    {
-        if(player1.y<numberOfBlocksY-1)
-        {
-            if(items[player1.x][player1.y+1]=='1')
-            {
-                player1.rangeOfExplosion++;
-                gameAudio.playSample(gameAudio.powerUp);
-                tela[player1.x][player1.y+1]='@';
-                items[player1.x][player1.y+1]='B';
-            }
-            if((testColisionDOWN('P'))&&(testColisionDOWN('B'))&&(testColisionDOWN('K')))
-            {
-                
-                if(tela[player1.x][player1.y]!='K') { tela[player1.x][player1.y]='F'; }
-                player1.y+=1;
-                tela[player1.x][player1.y]='@';
-                player1.imagem=sprite1_front1;
-                gameAudio.playSample(gameAudio.step2);
-            }
-            
-        }
-        
-    }
-
-    if(key[KEY_LEFT]||key[KEY_A])
-    {
-        if(player1.x>0)
-        {
-            if(items[player1.x-1][player1.y]=='1')
-            {
-                player1.rangeOfExplosion++;
-                gameAudio.playSample(gameAudio.powerUp);
-                tela[player1.x-1][player1.y]='@';
-                items[player1.x-1][player1.y]='B';
-            }
-            if((testColisionLEFT('P'))&&(testColisionLEFT('B'))&&(testColisionLEFT('K')))
-            {
-                
-                if(tela[player1.x][player1.y]!='K') { tela[player1.x][player1.y]='F'; }
-                player1.x-=1;
-                tela[player1.x][player1.y]='@';
-                player1.imagem=sprite1_left1;
-                gameAudio.playSample(gameAudio.step2);
-            }
-            
-        }
-        
-
-    }
-
-    if(key[KEY_RIGHT]||key[KEY_D])
-    {
-        if(player1.x<numberOfBlocksX-1)
-        {
-            if(items[player1.x+1][player1.y]=='1')
-            {
-                player1.rangeOfExplosion++;
-                gameAudio.playSample(gameAudio.powerUp);
-                 tela[player1.x+1][player1.y]='@';
-                 items[player1.x+1][player1.y]='B';
-            }
-            if((testColisionRIGHT('P'))&&(testColisionRIGHT('B'))&&(testColisionRIGHT('K')))
-            {
-               
-                if(tela[player1.x][player1.y]!='K') 
-                { 
-                    tela[player1.x][player1.y]='F'; 
-                }
-                player1.x+=1;
-                tela[player1.x][player1.y]='@';
-                player1.imagem=sprite1_right1;
-                gameAudio.playSample(gameAudio.step2);
-            }
-            
-        }
-        
-
-    }
-
-    if(key[KEY_SPACE])
-    {   //set krash bomb
-
-        if(player1.bomb[0].bombIsSet==false)
-        {
-            player1.bomb[0].setKrashBomb(timer,player1.x ,player1.y);
-            tela[player1.x][player1.y]='K';
-        }
-        else if(player1.bomb[1].bombIsSet==false)
-        {
-            player1.bomb[1].setKrashBomb(timer,player1.x ,player1.y);
-            tela[player1.x][player1.y]='K';
-        }
-        else if(player1.bomb[2].bombIsSet==false)
-        {
-            player1.bomb[2].setKrashBomb(timer,player1.x ,player1.y );
-            tela[player1.x][player1.y]='K';
-        }
-        else if(player1.bomb[3].bombIsSet==false)
-        {
-            player1.bomb[3].setKrashBomb(timer,player1.x ,player1.y );
-            tela[player1.x][player1.y]='K';
-        }
-        else if(player1.bomb[4].bombIsSet==false)
-        {
-            player1.bomb[4].setKrashBomb(timer,player1.x ,player1.y );
-            tela[player1.x][player1.y]='K';
-        }
-
-        
-    }
-
-
-    key[KEY_UP]=false;
-    key[KEY_DOWN]=false;
-    key[KEY_LEFT]=false;
-    key[KEY_RIGHT]=false;
-    key[KEY_SPACE]=false;
-    key[KEY_W]=false;
-    key[KEY_S]=false;
-    key[KEY_A]=false;
-    key[KEY_D]=false;
-    
-}
