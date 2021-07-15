@@ -38,10 +38,12 @@ class Audio
           destroy_sample(this->deadSkeleton);
           delete(this);
       }
-      
+      // method to play sound effect
       void playSample(SAMPLE* sound)
       { 
           play_sample(sound, 255, 128, 1000, 0);
       }
     
 }gameAudio;
+
+

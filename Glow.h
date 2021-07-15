@@ -22,7 +22,7 @@ class Glow
     }
     ~Glow()
     {
-        delete(this);       
+        //delete(this);       
     }
     void reset()
     {
@@ -52,3 +52,4 @@ class Glow
 
 
 }glow;
+

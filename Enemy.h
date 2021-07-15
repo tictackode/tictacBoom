@@ -36,12 +36,11 @@ class Enemy
    {
         destroy_bitmap(this->enemy_right);
         destroy_bitmap(this->enemy_left);
-        delete(this);
+        //delete(this);
    }
    
 
  
 
-};
+}skeleton;
 
-Enemy skeleton;

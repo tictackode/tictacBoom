@@ -4,7 +4,7 @@
 #include "Jogador.h"
 #include "Audio.h"
 #include "InitMapMatrix.h"
-
+//#include "Fonts.h"
  
 BITMAP* buffer;
 BITMAP* blocoVerm;
@@ -178,7 +178,7 @@ void highcolor_fade_in(BITMAP *bmp_orig, int speed)
 void loadAll()
 {   //function that loads all extern images and fonts
 
-    set_window_title("TictacKrash - A TictacKode's Bomberman clone!");
+    set_window_title("tictacBoom - A TictacKode's Bomberman clone!");
     buffer=create_bitmap(numberOfBlocksX*tamBloco,numberOfBlocksY*tamBloco);
 
     /*letra = load_font("fonts/arial18.pcx",NULL,NULL);
@@ -260,8 +260,6 @@ void loadAll()
         exit(1); 
     }
 
-
-
 }
 void freeAll()
 {   //clear the game bitmaps from memory
@@ -339,7 +337,7 @@ void checkSkeletonDestroyed(int x, int y)
          }
          
          numberOfEnemies=7;
-         stageNumber=2;
+         stageNumber++;
          
         
                             
@@ -559,7 +557,7 @@ void initGame()
 
     initMapMatrix();
     initBlockColor();
-    createBrickBitmap();
+    
 
     player1.x=10;
     player1.y=10;
@@ -658,6 +656,7 @@ void paint()
             }
             else if(tela[i][j]=='@')
             {    // drawing the player
+                 
                  draw_trans_sprite(player1.imagem, buffer, i*tamBloco, j*tamBloco);
                  
                  //blit(player1.imagem,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
@@ -678,9 +677,7 @@ void paint()
     }
 
     blit(player1.imagem,buffer,0,0,player1.x*tamBloco,player1.y*tamBloco,(player1.x*tamBloco)+tamBloco,(player1.y*tamBloco)+tamBloco);
-    //blit(artefato.imagem,buffer,0,0,artefato.x*tamBloco,artefato.y*tamBloco,(artefato.x*tamBloco)+tamBloco,(artefato.y*tamBloco)+tamBloco);
-    //blit(combustivel.imagem,buffer,0,0,combustivel.x*tamBloco,combustivel.y*tamBloco,(combustivel.x*tamBloco)+tamBloco,(combustivel.y*tamBloco)+tamBloco);
-
+    
     //timer
     textprintf_ex(buffer, font, 10,tamBloco ,makecol(glow.fontaux,glow.fontaux,glow.fontaux), -1,"Timer %d ",timer);
 

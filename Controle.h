@@ -187,6 +187,7 @@ void nextLevel()
      highcolor_fade_out(2);
      initGame();                  
      paint_to_buffer();
-     highcolor_fade_in(buffer, 2);     
+     highcolor_fade_in(buffer, 2);
+          
      
 }

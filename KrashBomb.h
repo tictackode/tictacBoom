@@ -29,7 +29,7 @@ class KrashBomb
    {
    
         destroy_bitmap(this->imagem);
-        delete(this);
+        //delete(this);
    }
 
     void setKrashBomb(volatile int timer,int x_location,int y_location)

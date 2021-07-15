@@ -1,5 +1,3 @@
-
-
 /*
     <<<Developed by Regson Jaques>>>
     https://www.youtube.com/c/RegsonJaquesMA
@@ -20,8 +18,7 @@ BITMAP* stageFloors[numberOfBlocksX][numberOfBlocksY];
 BITMAP* stageBricks[numberOfBlocksX][numberOfBlocksY];
 
 BITMAP* brick;
-BITMAP* createBlueBrickBitmap();
-BITMAP* createBrickBitmap();
+BITMAP* createAnyBrickBitmap(int red, int green, int blue);
 BITMAP* returnsRandomGrayscaleFloor();
 void criaBloco(BITMAP* bmp, int red, int green, int blue);
 
@@ -60,13 +57,20 @@ S - skeleton
                     tela[i][j]='B'; 
                     if(stageNumber==1)
                     {
-                    
-                        stageBricks[i][j]=createBrickBitmap();
+                         stageBricks[i][j]=createAnyBrickBitmap(0,0,0);
                     }
                     else if(stageNumber==2)
                     {
-                         stageBricks[i][j]=createBlueBrickBitmap();
+                         stageBricks[i][j]=createAnyBrickBitmap(255,0,0);
                          
+                    }
+                    else if(stageNumber==3)
+                    {
+                         stageBricks[i][j]=createAnyBrickBitmap(0,0,255);        
+                    }
+                    else if(stageNumber>=4)
+                    {
+                         stageBricks[i][j]=createAnyBrickBitmap(0,255,0);        
                     }
                     aux=rand()%100;
                     if(aux<15)
@@ -113,112 +117,63 @@ BITMAP* returnsRandomGrayscaleFloor()
     BITMAP* temp;
     temp=create_bitmap(tamBloco,tamBloco);
     int aux=32+rand()%32;
-
+    
     criaBloco(temp,aux,aux,aux);
+    
+    //random dots in the floor square
+    int randomPixels=512;
+    int aux1, aux2;
+    while(randomPixels>0)
+    {
+         aux1=((rand()%58));
+         aux2=((rand()%58));
+         
+         _putpixel32(temp, aux1, aux2, makecol(32+aux1,32+aux1,32+aux1)); 
+         randomPixels--;                   
+    }
 
+    
     return temp;
 }
-BITMAP* createBrickBitmap()
+
+BITMAP* createAnyBrickBitmap(int red, int green,int  blue)
 {
 
     brick=create_bitmap(tamBloco,tamBloco);
 
-    //if(!brick) { freeAll(); deinit(); exit(0); }
-
     int aux=200+rand()%25;
 
-    criaBloco(brick,aux,32,0);
+    criaBloco(brick,red,green,blue);
 
     aux=230+rand()%25;
 
-    //void hline(BITMAP *bmp, int x1, int y, int x2, int color);
+   
     hline(brick,0,15,64,makecol(aux,aux,aux));
     rect(brick,0,0,0,31,makecol(aux,aux,aux));
     aux=230+rand()%25;
 
     hline(brick,0,31,64,makecol(aux,aux,aux));
-   // rect(brick,31,31,0,31,makecol(aux,aux,aux));
+
     
     
     aux=230+rand()%25;
 
     hline(brick,0,46,64,makecol(aux,aux,aux));
 
-    //void vline(BITMAP *bmp, int x, int y1, int y2, int color);
-    //rect(BITMAP *bmp, int x1, int y1, int x2, int y2, int color);
+ 
     vline(brick,24,0 , 15, makecol(255,255,255));
     
-   // int positionTemp=rand()%20;
-   // rect(brick,positionTemp,0,positionTemp+15,15,makecol(255,255,255));
-    
-    //positionTemp=rand()%20;
     vline(brick,46,15 , 31, makecol(255,255,255));
-   // rect(brick,positionTemp,,positionTemp+15,31,makecol(255,255,255));
-    
-   // positionTemp=rand()%20;
+  
     vline(brick,36,31 , 46, makecol(255,255,255));
-    //rect(brick,positionTemp,31,positionTemp+15,46,makecol(255,255,255));
     
-   // positionTemp=rand()%20;
     vline(brick,50,46 , 63, makecol(255,255,255));
     vline(brick,12,46 , 63, makecol(255,255,255));
-   // rect(brick,positionTemp,46,positionTemp+15,63,makecol(255,255,255));
-      
+        
     rect(brick,0,0,63,63,makecol(255,255,255));
     
     return brick;
 }
-BITMAP* createBlueBrickBitmap()
-{
-
-    brick=create_bitmap(tamBloco,tamBloco);
-
-    //if(!brick) { freeAll(); deinit(); exit(0); }
-
-    int aux=200+rand()%25;
-
-    criaBloco(brick,0,32,255);
-
-    aux=230+rand()%25;
-
-    //void hline(BITMAP *bmp, int x1, int y, int x2, int color);
-    hline(brick,0,15,64,makecol(aux,aux,aux));
-    rect(brick,0,0,0,31,makecol(aux,aux,aux));
-    aux=230+rand()%25;
-
-    hline(brick,0,31,64,makecol(aux,aux,aux));
-   // rect(brick,31,31,0,31,makecol(aux,aux,aux));
-    
-    
-    aux=230+rand()%25;
-
-    hline(brick,0,46,64,makecol(aux,aux,aux));
-
-    //void vline(BITMAP *bmp, int x, int y1, int y2, int color);
-    //rect(BITMAP *bmp, int x1, int y1, int x2, int y2, int color);
-    vline(brick,24,0 , 15, makecol(255,255,255));
-    
-   // int positionTemp=rand()%20;
-   // rect(brick,positionTemp,0,positionTemp+15,15,makecol(255,255,255));
-    
-    //positionTemp=rand()%20;
-    vline(brick,46,15 , 31, makecol(255,255,255));
-   // rect(brick,positionTemp,,positionTemp+15,31,makecol(255,255,255));
-    
-   // positionTemp=rand()%20;
-    vline(brick,36,31 , 46, makecol(255,255,255));
-    //rect(brick,positionTemp,31,positionTemp+15,46,makecol(255,255,255));
-    
-   // positionTemp=rand()%20;
-    vline(brick,50,46 , 63, makecol(255,255,255));
-    vline(brick,12,46 , 63, makecol(255,255,255));
-   // rect(brick,positionTemp,46,positionTemp+15,63,makecol(255,255,255));
-      
-    rect(brick,0,0,63,63,makecol(255,255,255));
-    
-    return brick;
-}
-
 
 void criaBloco(BITMAP* bmp, int red, int green, int blue)
 {   //this function generates the color for the square bitmaps

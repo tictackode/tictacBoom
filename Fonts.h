@@ -17,7 +17,7 @@ class Fonts
       Fonts()
       {
           
-             
+             this->loadALLFonts();
       }
       ~Fonts()
       {
@@ -49,4 +49,6 @@ class Fonts
           play_sample(sound, 255, 128, 1000, 0);
       }*/
     
-};
+}gameFonts;
+
+
