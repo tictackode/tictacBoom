@@ -17,7 +17,10 @@ void controle()
         {
             if(tela[player1.x][player1.y-1]=='D')
             {
-                 nextLevel();                                           
+                totalEnemies+=2;
+                numberOfEnemies=totalEnemies;
+                stageNumber++;
+                nextLevel();                                           
             }
             if((items[player1.x][player1.y-1]=='1')&&(tela[player1.x][player1.y-1]!='B'))
             {
@@ -47,7 +50,11 @@ void controle()
     {
         if(tela[player1.x][player1.y+1]=='D')
         {
-            nextLevel();                                           
+            totalEnemies+=2;
+            numberOfEnemies=totalEnemies;
+            stageNumber++;
+            nextLevel(); 
+                                                       
         }
         if(player1.y<numberOfBlocksY-1)
         {
@@ -74,8 +81,12 @@ void controle()
 
     if(key[KEY_LEFT]||key[KEY_A])
     {
+        //if player has entered in the door, he goes to the next stage
         if(tela[player1.x-1][player1.y]=='D')
         {
+            totalEnemies+=2;
+            numberOfEnemies=totalEnemies;
+            stageNumber++; 
             nextLevel();                                           
         }
         if(player1.x>0)
@@ -106,6 +117,9 @@ void controle()
     {
         if(tela[player1.x+1][player1.y]=='D')
         {
+            totalEnemies+=2;
+            numberOfEnemies=totalEnemies;
+            stageNumber++;
             nextLevel();                                           
         }
         if(player1.x<numberOfBlocksX-1)
@@ -184,10 +198,10 @@ void controle()
 
 void nextLevel()
 {
-     highcolor_fade_out(2);
+     highcolor_fade_out(3);
      initGame();                  
      paint_to_buffer();
-     highcolor_fade_in(buffer, 2);
+     highcolor_fade_in(buffer, 3);
           
      
 }

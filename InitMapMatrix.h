@@ -11,6 +11,7 @@
 
 int stageNumber=1;
 int numberOfEnemies=5;
+int totalEnemies=5;
 
 char tela[numberOfBlocksX][numberOfBlocksY];
 char items[numberOfBlocksX][numberOfBlocksY];
@@ -33,7 +34,6 @@ P - pillar -         coluna de concreto
 S - skeleton
 
 
-
 */
     for(int i=0;i<numberOfBlocksX;i++)
     {
@@ -52,28 +52,36 @@ S - skeleton
             {
                 // 50% of chance to set a Brick
                 aux=rand()%30;
-                if(aux<14)
+                if(aux>13)
                 {
                     tela[i][j]='B'; 
                     if(stageNumber==1)
                     {
-                         stageBricks[i][j]=createAnyBrickBitmap(0,0,0);
+                         stageBricks[i][j]=createAnyBrickBitmap(64,64,64);
                     }
                     else if(stageNumber==2)
                     {
-                         stageBricks[i][j]=createAnyBrickBitmap(255,0,0);
+                         stageBricks[i][j]=createAnyBrickBitmap(255,0,64);
                          
                     }
                     else if(stageNumber==3)
                     {
                          stageBricks[i][j]=createAnyBrickBitmap(0,0,255);        
                     }
-                    else if(stageNumber>=4)
+                    else if(stageNumber==4)
                     {
-                         stageBricks[i][j]=createAnyBrickBitmap(0,255,0);        
+                         stageBricks[i][j]=createAnyBrickBitmap(128,255,0);        
+                    }
+                    else if(stageNumber==5)
+                    {
+                         stageBricks[i][j]=createAnyBrickBitmap(0,32,128);        
+                    }
+                    else if(stageNumber>6)
+                    {
+                         stageBricks[i][j]=createAnyBrickBitmap(128,255,32);        
                     }
                     aux=rand()%100;
-                    if(aux<15)
+                    if(aux<2)
                     {
                         //sets item range of explosion
                         items[i][j]='1';
@@ -106,9 +114,14 @@ S - skeleton
              numberOfEnemies--;   
          } 
      }
-     numberOfEnemies=5;
+     numberOfEnemies=totalEnemies;
     
 
+    tela[9][10]='F';
+    tela[11][10]='F';
+    tela[10][9]='F';
+    tela[10][8]='F';
+    
 }
 
 

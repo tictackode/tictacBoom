@@ -1,12 +1,15 @@
-
-
+/*
+    Developed by Regson Jaques
+    https://www.youtube.com/c/RegsonjaquesMA
+    GitHub: tictackode
+    twitter: @regsonj
+*/
 
 class KrashBomb
 {
    public:
    int x_location;
    int y_location;
-   //int rangeOfExplosion;
    volatile int activationTime;
    int bombTimeCount;
    bool bombIsSet;

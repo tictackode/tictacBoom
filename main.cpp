@@ -1,4 +1,5 @@
 
+
 #include <allegro.h>
 #include <time.h>
 #include "Glow.h"
@@ -41,6 +42,7 @@ int main()
         paint();
         glow.glowingColor();
         controle();
+        checkSkeletonMovement();
 
         player1.bomb[0].checkExplosion();
         player1.bomb[1].checkExplosion();

@@ -17,6 +17,7 @@ BITMAP* blocoLaranja;
 BITMAP* blocoRosa;
 BITMAP* logo;
 BITMAP* krashBombImage;
+BITMAP* oldBomb;
 
 BITMAP* explosionBitmap;
 BITMAP* itemRaiseRangeOfExplosion;
@@ -203,6 +204,10 @@ void loadAll()
     itemRaiseRangeOfExplosion=create_bitmap(tamBloco,tamBloco);
     itemRaiseRangeOfExplosion=load_bitmap("img/itemRaiseRangeOfExplosion.bmp",0);
     if(!itemRaiseRangeOfExplosion) { exit(1); }
+    
+    oldBomb=create_bitmap(tamBloco,tamBloco);
+    oldBomb=load_bitmap("img/oldbomb.bmp",0);
+    if(!oldBomb) { exit(1); }
 
     sprite1_front1=create_bitmap(tamBloco,tamBloco);
     sprite1_front1=load_bitmap("img/sprite1_front1.bmp",0);
@@ -307,13 +312,80 @@ BITMAP* randomExplosionBitmap()
     return explosionBitmap;
 }
 
+void checkSkeletonMovement()
+{
+     int movementInterval=rand()%10000;
+     for(int x=0;x<numberOfBlocksX;x++)
+     {
+          for(int y=0;y<numberOfBlocksY;y++)
+          {
+              
+              
+              if(tela[x][y]=='S')
+              {
+                  
+                  if(movementInterval<10)
+                  {
+                      if(x<numberOfBlocksX-1)
+                      {
+                         if(tela[x+1][y]=='F')
+                         {
+                             tela[x+1][y]='S';
+                             tela[x][y]='F';                        
+                         }
+                      }                      
+                                
+                  }
+                  else if((movementInterval>90)&&(movementInterval<100))
+                  {
+                       if(x>0)
+                       {    
+                          if(tela[x-1][y]=='F')
+                          {
+                              tela[x-1][y]='S';
+                              tela[x][y]='F';                        
+                          }   
+                       }                                        
+                  } 
+                  else if((movementInterval>50)&&(movementInterval<60))
+                  {
+                       if(y<numberOfBlocksY-1)
+                       {
+                          if(tela[x][y+1]=='F')
+                          {
+                              tela[x][y+1]='S';
+                              tela[x][y]='F';                        
+                          } 
+                       }                                          
+                  }
+                  else if((movementInterval>30)&&(movementInterval<40))
+                  {
+                       if(y>0)
+                       {
+                          if(tela[x][y-1]=='F')
+                          {
+                               tela[x][y-1]='S';
+                               tela[x][y]='F';
+                                                  
+                          } 
+                       }                                          
+                  }
+                  
+            }  //if            
+        }//for     
+                             
+    }//for     
+         
+     
+}
 void checkSkeletonDestroyed(int x, int y)
 {
     if(tela[x][y]=='S')
     {
         
         gameAudio.playSample(gameAudio.deadSkeleton);
-        numberOfEnemies--;                
+        numberOfEnemies--; 
+        tela[x][y]='F';               
                      
     }  
     
@@ -325,8 +397,8 @@ void checkSkeletonDestroyed(int x, int y)
          bool doorOK=false;
          while(!doorOK)
          {
-             temp1=rand()%64;
-             temp2=rand()%64;
+             temp1=rand()%numberOfBlocksX;
+             temp2=rand()%numberOfBlocksY;
          
              if(tela[temp1][temp2]=='F')
              {
@@ -336,15 +408,10 @@ void checkSkeletonDestroyed(int x, int y)
              
          }
          
-         numberOfEnemies=7;
-         stageNumber++;
-         
-        
+         numberOfEnemies=totalEnemies;
+          
                             
-    }
-      
-     
-     
+    }  
      
 } 
 
@@ -626,7 +693,7 @@ void paint()
             }
             else if(tela[i][j]=='K')
             {    // drawing a krash bomb
-                 blit(krashBombImage,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
+                 blit(oldBomb,buffer,0,0,i*tamBloco,j*tamBloco,(i*tamBloco)+tamBloco,(j*tamBloco)+tamBloco);
                  
                  
             }
